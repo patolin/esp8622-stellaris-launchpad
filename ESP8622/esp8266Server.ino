@@ -48,7 +48,6 @@ void loop() {
   
   // verificamos la opcion
   estado=0;
-  val=0;
   if (req.indexOf("/led/off") != -1)
     val = 0;
   else if (req.indexOf("/led/rojo") != -1)
