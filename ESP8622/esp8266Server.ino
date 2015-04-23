@@ -12,7 +12,7 @@ int temperatura;
 int val=0;
 int estado=0;
 
-// TCP server at port 80 will respond to HTTP requests
+// Requests al puerto 80
 WiFiServer server(80);
 
 void setup(void)
@@ -26,14 +26,6 @@ void setup(void)
   Serial.println(WiFi.localIP());
   
 
-  
-  //server.on("/", handle_root);
-  
-  /*
-  server.on("/inline", [](){
-    server.send(200, "text/plain", "this works as well");
-  });
-  */
   server.begin();
   Serial.println("HTTP server started");
   
@@ -41,25 +33,22 @@ void setup(void)
 }
 
 void loop() {
-  // Check if a client has connected
+  // Chequeamos si se ha conectado un cliente
   WiFiClient client = server.available();
   if (!client) {
     return;
   }
   
-  // Wait until the client sends some data
-  //Serial.println("new client");
   while(!client.available()){
     delay(1);
   }
   
-  // Read the first line of the request
   String req = client.readStringUntil('\r');
-  //Serial.println(req);
   client.flush();
   
-  // Match the request
-
+  // verificamos la opcion
+  estado=0;
+  val=0;
   if (req.indexOf("/led/off") != -1)
     val = 0;
   else if (req.indexOf("/led/rojo") != -1)
@@ -71,12 +60,11 @@ void loop() {
   else if (req.indexOf("/status") != -1)
     estado = 1;
   else {
-    //Serial.println("invalid request");
     client.stop();
     return;
   }
 
-  // Set GPIO2 according to the request
+  
   if (estado==0) {
     // enviamos por el serial el cambio del led
     Serial.print(val);  
@@ -92,7 +80,7 @@ void loop() {
   
   client.flush();
 
-  // Prepare the response
+  // Generamos la respuesta
   String s;
   if (estado==0) {
     s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nEl Led esta: ";
@@ -130,15 +118,12 @@ void loop() {
     s+="<br/>\r\n";
     s+="Temp: ";
     s+=temperatura;
+    s+=" grados";
     s += "</html>\n";
       
   }
-  // Send the response to the client
+  // Enviamos la respuesta al cliente
   client.print(s);
   delay(1);
-  //Serial.println("Client disonnected");
-
-  // The client will actually be disconnected 
-  // when the function returns and 'client' object is detroyed
 }
 
